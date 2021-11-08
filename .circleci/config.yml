@@ -20,7 +20,7 @@ jobs:
           name: wait for registry to be ready
           command: |
             docker container run --network container:registry jwilder/dockerize \
-            -wait http://localhost:8081 -wait-retry-interval 1s -timeout 15s
+            -wait http://localhost:8081 -wait-retry-interval 2s -timeout 60s
 
 workflows:
   # Runs services as-per a docker-compose file,
