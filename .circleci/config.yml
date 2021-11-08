@@ -1,0 +1,35 @@
+version: 2.1
+
+jobs:
+  docker_compose_tests:
+    docker:
+      - image: cimg/base:2020.08
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: '20.10.7'
+      - run:
+          name: Spin up services with Docker Compose
+          command: |
+            docker-compose up -d
+      - run:
+          name: Wait on application to be ready
+          command: |
+            # not so deterministic
+            sleep 10
+            docker ps
+      - run:
+          name: Ping registry insider its own container
+          command: |
+            docker container run --network container:registry appropriate/curl --retry 10 --retry-connrefused http://localhost:8081
+      - run:
+          name: Test connecting to registry from box
+          command: |
+            docker-compose -p whale-of-a-time exec box curl http://registry:8081
+
+workflows:
+  # Runs services as-per a docker-compose file,
+  # and runs integration tests against spun services.
+  compose_tests:
+    jobs:
+      - docker_compose_tests
